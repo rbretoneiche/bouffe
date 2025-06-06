@@ -1,7 +1,7 @@
 // Installation requise : npm install leaflet @types/leaflet
 
 // map.component.ts
-import { Component, OnInit, OnDestroy, Input, OnChanges, SimpleChanges } from '@angular/core';
+import {Component, OnInit, OnDestroy, Input, OnChanges, SimpleChanges} from '@angular/core';
 import * as L from 'leaflet';
 
 export interface Country {
@@ -80,6 +80,7 @@ export interface Country {
 })
 export class MapComponent implements OnInit, OnDestroy, OnChanges {
   @Input() selectedCountries: Country[] = [];
+  @Input() selectedCountry: Country | null = null;
 
   private map!: L.Map;
   private markers: L.Marker[] = [];
@@ -91,6 +92,17 @@ export class MapComponent implements OnInit, OnDestroy, OnChanges {
     iconUrl: 'data:image/svg+xml;base64,' + btoa(`
       <svg xmlns="http://www.w3.org/2000/svg" width="25" height="41" viewBox="0 0 25 41">
         <path fill="#FF6B6B" stroke="#fff" stroke-width="2" d="M12.5 0C5.6 0 0 5.6 0 12.5c0 12.5 12.5 28.5 12.5 28.5s12.5-16 12.5-28.5C25 5.6 19.4 0 12.5 0z"/>
+        <circle fill="#fff" cx="12.5" cy="12.5" r="5"/>
+      </svg>
+    `),
+    iconSize: [25, 41],
+    iconAnchor: [12.5, 41],
+    popupAnchor: [0, -41]
+  });
+  private customSelectedIcon = L.icon({
+    iconUrl: 'data:image/svg+xml;base64,' + btoa(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="25" height="41" viewBox="0 0 25 41">
+        <path fill="#706bff" stroke="#fff" stroke-width="2" d="M12.5 0C5.6 0 0 5.6 0 12.5c0 12.5 12.5 28.5 12.5 28.5s12.5-16 12.5-28.5C25 5.6 19.4 0 12.5 0z"/>
         <circle fill="#fff" cx="12.5" cy="12.5" r="5"/>
       </svg>
     `),
@@ -124,7 +136,7 @@ export class MapComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['selectedCountries'] && this.map) {
+    if ((changes['selectedCountries'] || changes['selectedCountry']) && this.map) {
       this.updateMarkers();
     }
   }
@@ -157,7 +169,7 @@ export class MapComponent implements OnInit, OnDestroy, OnChanges {
     // Ajouter les nouveaux marqueurs
     this.selectedCountries.forEach((country, index) => {
       const marker = L.marker([country.lat, country.lng], {
-        icon: this.customIcon
+        icon: this.selectedCountry === country ? this.customSelectedIcon : this.customIcon
       }).addTo(this.map);
 
       // Popup avec informations du pays

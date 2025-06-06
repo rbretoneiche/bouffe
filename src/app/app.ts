@@ -90,7 +90,8 @@ import {NgClass} from '@angular/common';
 
         <app-map
           #mapComponent
-          [selectedCountries]="selectedCountries">
+          [selectedCountries]="selectedCountries"
+          [selectedCountry]="selectedCountry">
         </app-map>
       } @else {
         <div class="header">
