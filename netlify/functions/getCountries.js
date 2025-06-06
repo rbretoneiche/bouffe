@@ -1,7 +1,7 @@
 import { neon } from '@neondatabase/serverless';
 
 // Docs on request and context https://docs.netlify.com/functions/build/#code-your-function-2
-export default async (request, context) => {
+exports.handler = async (request, context) => {
   const sql = neon(process.env.DATABASE_URL);
   try {
     const rows = await sql('SELECT * FROM countries;');

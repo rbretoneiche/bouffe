@@ -1,22 +1,23 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {Injectable} from '@angular/core';
 import {forkJoin, map} from 'rxjs';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({providedIn: 'root'})
 export class CountryService {
   private baseUrl = 'https://restcountries.com/v3.1';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+  }
 
   // Formule de Haversine
   private getDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
     const R = 6371;
     const dLat = this.toRad(lat2 - lat1);
     const dLon = this.toRad(lon2 - lon1);
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(this.toRad(lat1)) * Math.cos(this.toRad(lat2)) *
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }
 
@@ -25,7 +26,6 @@ export class CountryService {
   }
 
   getDistantCountries(inputCountry: string, minDistanceKm = 1500, count = 3) {
-    this.getDoneCountries();
     const allCountries$ = this.http.get<any[]>(`${this.baseUrl}/all?fields=name,latlng`);
     const targetCountry$ = this.http.get<any[]>(`${this.baseUrl}/name/${inputCountry}`);
 
@@ -39,7 +39,7 @@ export class CountryService {
           .map(c => {
             const [lat2, lon2] = c.latlng;
             const distance = this.getDistance(lat1, lon1, lat2, lon2);
-            return { name: c.name.common, distance, lat2, lon2 };
+            return {name: c.name.common, distance, lat2, lon2};
           })
           .filter(c => c.distance >= minDistanceKm)
           .sort(() => Math.random() - 0.5) // shuffle
@@ -51,5 +51,6 @@ export class CountryService {
   }
 
   getDoneCountries() {
+    return this.http.get('http://localhost:8888/.netlify/functions/getCountries')
   }
 }

@@ -1,7 +1,8 @@
-import { Component, ViewChild } from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import {Country, MapComponent} from './components/map.component';
 import {FormsModule} from '@angular/forms';
 import {CountryService} from './services/country.service';
+import {AsyncPipe} from '@angular/common';
 
 @Component({
   selector: 'app-root',
@@ -9,7 +10,12 @@ import {CountryService} from './services/country.service';
     <div class="container">
       <div class="header">
         <h1>Pays Distants Aléatoires</h1>
-
+        <h2>Pays déjà faits:</h2>
+        <ul>
+          @for (country of (doneCountries$ | async); track country) {
+            <li>{{ country }}</li>
+          }
+        </ul>
         <div class="input-section">
           <div class="input-group">
             <input
@@ -77,7 +83,8 @@ import {CountryService} from './services/country.service';
   `,
   imports: [
     MapComponent,
-    FormsModule
+    FormsModule,
+    AsyncPipe
   ],
   styles: [`
     .container {
@@ -290,11 +297,13 @@ export class AppComponent {
   isLoading: boolean = false;
   errorMessage: string = '';
   suspenseMessage: string = '';
-
+  doneCountries$;
   // Expose Math pour le template
   Math = Math;
 
-  constructor(private countryService: CountryService) {}
+  constructor(private countryService: CountryService) {
+    this.doneCountries$ = this.countryService.getDoneCountries()
+  }
 
   generateDistantCountries(): void {
     if (!this.inputCountry.trim()) {
