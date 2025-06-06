@@ -14,22 +14,23 @@ import {Observable} from 'rxjs';
 
           <div class="input-section">
             <div class="input-row">
-              <div class="input-group">
-                <label class="input-label">Dernier pays visité:</label>
-                <input
-                  disabled
-                  type="text"
-                  [(ngModel)]="inputCountry"
-                  placeholder="Entrez un pays de référence"
-                  class="country-input"
-                  (keyup.enter)="generateDistantCountries()"
-                >
-              </div>
-
+              @if (selectedCountries.length) {
+                <div class="input-group">
+                  <label class="input-label">Dernier pays visité:</label>
+                  <input
+                    disabled
+                    type="text"
+                    [(ngModel)]="inputCountry"
+                    placeholder="Entrez un pays de référence"
+                    class="country-input"
+                    (keyup.enter)="generateDistantCountries()"
+                  >
+                </div>
+              }
               <button
                 class="btn-generate"
                 (click)="generateDistantCountries()"
-                [disabled]="!inputCountry.trim() || isLoading"
+                [disabled]="isLoading"
               >
                 @if (isLoading) {
                   <span class="spinner"></span>
@@ -582,11 +583,6 @@ export class AppComponent {
   }
 
   generateDistantCountries(): void {
-    if (!this.inputCountry.trim()) {
-      this.errorMessage = 'Veuillez entrer un pays de référence.';
-      return;
-    }
-
     this.isLoading = true;
     this.errorMessage = '';
     this.selectedCountries = [];
