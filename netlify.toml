@@ -1,6 +1,6 @@
 [build]
   publish = "dist/bouffe/browser"
-  command = "ng build --prod"
+  command = "ng build"
   functions = "./functions"
 [[redirects]]
   from = "/*"
