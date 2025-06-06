@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://localhost:7000/',
+  apiUrl: 'https://splendorous-meerkat-d7b6f9.netlify.app//',
 };
