@@ -1,3 +1,6 @@
+[dev]
+  functions = "functions"
+  functionsPort = 7000
 [build]
   publish = "dist/bouffe/browser"
   command = "ng build"
