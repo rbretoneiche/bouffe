@@ -21,7 +21,7 @@ import {Observable} from 'rxjs';
         <div class="overlay">
           <!-- Header flottant -->
           <div class="floating-header">
-            <h1 class="app-title">🌍 BOUFFE-TROTTEUR</h1>
+            <h1 class="app-title">BOUFFE-TROTTEUR</h1>
             <p class="app-subtitle">Découvrez votre prochaine destination culinaire</p>
           </div>
 
