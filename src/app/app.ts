@@ -7,111 +7,131 @@ import {Observable} from 'rxjs';
 @Component({
   selector: 'app-root',
   template: `
-    <div class="container">
+    <div class="app-container" [class.success-mode]="submitted">
+      <!-- Interface principale avec carte en arrière-plan -->
       @if (!submitted) {
-        <div class="header">
-          <h1>BOUFFE-TROTTEUR</h1>
-
-          <div class="input-section">
-            <div class="input-row">
-              @if (selectedCountries.length) {
-                <div class="input-group">
-                  <label class="input-label">Dernier pays visité:</label>
-                  <input
-                    disabled
-                    type="text"
-                    [(ngModel)]="inputCountry"
-                    placeholder="Entrez un pays de référence"
-                    class="country-input"
-                    (keyup.enter)="generateDistantCountries()"
-                  >
-                </div>
-              }
-              <button
-                class="btn-generate"
-                (click)="generateDistantCountries()"
-                [disabled]="isLoading"
-              >
-                @if (isLoading) {
-                  <span class="spinner"></span>
-                  <span class="suspense-text">{{ suspenseMessage }}</span>
-                } @else if (!selectedCountries.length) {
-                  <span class="btn-icon">🌍</span>
-                  <span class="btn-text">Trouver 3 pays distants</span>
-                } @else {
-                  <span class="btn-icon">🌍</span>
-                  <span class="btn-text">Recommencer</span>
-                }
-              </button>
-            </div>
-          </div>
-
-          @if (errorMessage) {
-            <div class="error-message">
-              {{ errorMessage }}
-            </div>
-          }
-        </div>
-
-        @if (selectedCountries.length > 0) {
-          <div class="countries-section">
-            <h3>Pays trouvés (distants de {{ inputCountry }}):</h3>
-
-            <div class="country-cards">
-              @for (country of selectedCountries; track country.name; let i = $index) {
-                <div class="country-card"
-                     (click)="selectedCountry = country"
-                     [class.selected]="selectedCountry?.name === country.name">
-                  <div class="country-number">{{ i + 1 }}</div>
-                  <div class="country-info">
-                    <span class="country-name">{{ country.name }}</span>
-                    @if (country.distance) {
-                      <span class="country-distance">{{ Math.round(country.distance) }} km</span>
-                    }
-                  </div>
-                  @if (country.flag) {
-                    <img [src]="country.flag" class="country-flag" alt="Drapeau {{ country.name }}">
-                  }
-                </div>
-              }
-            </div>
-
-            <button
-              class="btn-go"
-              (click)="selectCountry()"
-              [disabled]="!selectedCountry || isLoading"
-            >
-              @if (isLoading) {
-                <span class="spinner"></span>
-                <span>Validation...</span>
-              } @else {
-                <span class="btn-text">Valider ma sélection</span>
-              }
-            </button>
-          </div>
-        }
-
+        <!-- Carte en plein écran -->
         <app-map
           #mapComponent
           [selectedCountries]="selectedCountries"
           [selectedCountry]="selectedCountry">
         </app-map>
+
+        <!-- Overlay avec les contrôles flottants -->
+        <div class="overlay">
+          <!-- Header flottant -->
+          <div class="floating-header">
+            <h1 class="app-title">🌍 BOUFFE-TROTTEUR</h1>
+            <p class="app-subtitle">Découvrez votre prochaine destination culinaire</p>
+          </div>
+
+          <!-- Section de contrôle principale -->
+          <div class="main-controls">
+            @if (inputCountry) {
+              <div class="reference-country">
+                <span class="reference-label">📍 Dernier pays visité:</span>
+                <span class="reference-name">{{ inputCountry }}</span>
+              </div>
+            }
+
+            <button
+              class="btn-generate"
+              (click)="generateDistantCountries()"
+              [disabled]="isLoading"
+            >
+              @if (isLoading) {
+                <span class="spinner"></span>
+                <span class="suspense-text">{{ suspenseMessage }}</span>
+              } @else if (!selectedCountries.length) {
+                <span class="btn-icon">🎯</span>
+                <span class="btn-text">Trouver 3 pays distants</span>
+              } @else {
+                <span class="btn-icon">🔄</span>
+                <span class="btn-text">Recommencer</span>
+              }
+            </button>
+
+            @if (errorMessage) {
+              <div class="error-message">
+                <span class="error-icon">⚠️</span>
+                {{ errorMessage }}
+              </div>
+            }
+          </div>
+
+          <!-- Panel des pays trouvés -->
+          @if (selectedCountries.length > 0) {
+            <div class="countries-panel">
+              <div class="panel-header">
+                <h3>🎲 Destinations trouvées</h3>
+                <span class="distance-info">Distantes de {{ inputCountry }}</span>
+              </div>
+
+              <div class="country-cards">
+                @for (country of selectedCountries; track country.name; let i = $index) {
+                  <div class="country-card"
+                       (click)="selectedCountry = country"
+                       [class.selected]="selectedCountry?.name === country.name">
+                    <div class="card-content">
+                      <div class="country-header">
+                        <div class="country-number">{{ i + 1 }}</div>
+                        @if (country.flag) {
+                          <img [src]="country.flag" class="country-flag" alt="Drapeau {{ country.name }}">
+                        }
+                      </div>
+                      <div class="country-info">
+                        <span class="country-name">{{ country.name }}</span>
+                        @if (country.distance) {
+                          <span class="country-distance">🛫 {{ Math.round(country.distance) }} km</span>
+                        }
+                      </div>
+                    </div>
+                    @if (selectedCountry?.name === country.name) {
+                      <div class="selection-indicator">✓</div>
+                    }
+                  </div>
+                }
+              </div>
+
+              <button
+                class="btn-validate"
+                (click)="selectCountry()"
+                [disabled]="!selectedCountry || isLoading"
+              >
+                @if (isLoading) {
+                  <span class="spinner"></span>
+                  <span>Validation...</span>
+                } @else {
+                  <span class="btn-icon">🎉</span>
+                  <span class="btn-text">Valider ma sélection</span>
+                }
+              </button>
+            </div>
+          }
+        </div>
       } @else {
+        <!-- Écran de succès -->
         <div class="success-screen">
-          <div class="success-header">
-            <h1>BOUFFE-TROTTEUR</h1>
-            <div class="success-content">
-              <h2>Félicitations!</h2>
-              <p>Votre prochaine bouffe sera sur le thème du:</p>
+          <div class="success-background"></div>
+          <div class="success-content">
+            <div class="success-header">
+              <h1 class="success-title">🌍 BOUFFE-TROTTEUR</h1>
+              <div class="celebration">🎉 Félicitations! 🎉</div>
+            </div>
+
+            <div class="result-card">
+              <p class="result-text">Votre prochaine bouffe sera sur le thème du:</p>
               <div class="selected-country">
-                <span class="country-name-large">{{ selectedCountry?.name }}</span>
                 @if (selectedCountry?.flag) {
                   <img [src]="selectedCountry?.flag" class="success-flag" alt="Drapeau {{ selectedCountry?.name }}">
                 }
+                <span class="country-name-large">{{ selectedCountry?.name }}</span>
               </div>
             </div>
+
             <button class="btn-back" (click)="reset()">
-              <span>← Retour en arrière</span>
+              <span class="btn-icon">👈</span>
+              <span>Nouvelle aventure</span>
             </button>
           </div>
         </div>
@@ -123,233 +143,239 @@ import {Observable} from 'rxjs';
     FormsModule,
   ],
   styles: [`
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 16px;
+    .app-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      min-height: 100vh;
     }
 
-    .header {
-      text-align: center;
-      margin-bottom: 24px;
-    }
-
-    .header h1 {
-      color: #333;
-      margin-bottom: 24px;
-      font-size: 2.5rem;
-    }
-
-    .input-section {
-      margin-bottom: 24px;
-    }
-
-    .input-row {
+    /* Overlay pour les contrôles flottants */
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1000;
+      pointer-events: none;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      padding: 20px;
+      gap: 20px;
+    }
+
+    .overlay > * {
+      pointer-events: auto;
+    }
+
+    /* Header flottant */
+    .floating-header {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      animation: slideInFromTop 0.6s ease-out;
+    }
+
+    .app-title {
+      margin: 0 0 8px 0;
+      font-size: 2.2rem;
+      font-weight: bold;
+      background: linear-gradient(45deg, #FF6B6B, #4ECDC4, #FFD93D);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .app-subtitle {
+      margin: 0;
+      color: #666;
+      font-size: 1rem;
+      font-style: italic;
+    }
+
+    /* Contrôles principaux */
+    .main-controls {
+      display: flex;
+      flex-direction: column;
       align-items: center;
+      gap: 16px;
+      animation: slideInFromLeft 0.6s ease-out 0.2s both;
     }
 
-    .input-group {
+    .reference-country {
+      background: rgba(78, 205, 196, 0.95);
+      backdrop-filter: blur(10px);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 25px;
       display: flex;
-      flex-direction: column;
+      align-items: center;
       gap: 8px;
-      width: 100%;
-      max-width: 350px;
+      font-weight: 500;
+      box-shadow: 0 4px 20px rgba(78, 205, 196, 0.3);
     }
 
-    .input-label {
-      font-weight: 600;
-      color: #555;
-      text-align: center;
+    .reference-label {
+      font-size: 14px;
+      opacity: 0.9;
     }
 
-    .country-input {
-      padding: 14px 16px;
-      border: 2px solid #e1e5e9;
-      border-radius: 12px;
+    .reference-name {
+      font-weight: bold;
       font-size: 16px;
-      width: 100%;
-      box-sizing: border-box;
-      transition: border-color 0.2s;
-      text-align: center;
-    }
-
-    .country-input:focus {
-      outline: none;
-      border-color: #4ECDC4;
     }
 
     .btn-generate {
-      background: linear-gradient(45deg, #FF6B6B, #FFD93D);
+      background: linear-gradient(45deg, #FF6B6B, #FFD93D, #4ECDC4);
+      background-size: 200% 200%;
       color: white;
       border: none;
-      padding: 16px 24px;
-      border-radius: 25px;
+      padding: 18px 32px;
+      border-radius: 30px;
       font-size: 16px;
       font-weight: bold;
       cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: all 0.3s ease;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      min-height: 54px;
-      width: 100%;
-      max-width: 350px;
+      gap: 10px;
+      min-height: 60px;
+      min-width: 280px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+      animation: gradientShift 3s ease infinite;
+    }
+
+    @keyframes gradientShift {
+      0%, 100% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
     }
 
     .btn-generate:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
     }
 
     .btn-generate:disabled {
-      opacity: 0.6;
+      opacity: 0.7;
       cursor: not-allowed;
       transform: none;
     }
 
     .btn-icon {
-      font-size: 18px;
+      font-size: 20px;
     }
 
     .btn-text {
-      text-align: center;
-    }
-
-    .btn-go {
-      background: linear-gradient(45deg, #6bcbff, #FFD93D);
-      color: white;
-      border: none;
-      padding: 16px 32px;
-      border-radius: 25px;
-      font-size: 18px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      min-height: 56px;
-      width: 100%;
-      max-width: 300px;
-      margin: 24px auto 0;
-    }
-
-    .btn-go:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    .btn-go:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .btn-back {
-      background: linear-gradient(45deg, #74b9ff, #a29bfe);
-      color: white;
-      border: none;
-      padding: 16px 32px;
-      border-radius: 25px;
       font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-      margin-top: 24px;
     }
 
-    .btn-back:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    /* Panel des pays */
+    .countries-panel {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      max-height: 50vh;
+      overflow-y: auto;
+      animation: slideInFromRight 0.6s ease-out 0.4s both;
     }
 
-    .spinner {
-      width: 16px;
-      height: 16px;
-      border: 2px solid transparent;
-      border-top: 2px solid white;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      flex-shrink: 0;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .error-message {
-      background: #ffe6e6;
-      color: #d63031;
-      padding: 16px 20px;
-      border-radius: 12px;
-      margin: 16px auto;
-      max-width: 400px;
-      border-left: 4px solid #d63031;
-      text-align: left;
-    }
-
-    .countries-section {
-      margin-bottom: 32px;
+    .panel-header {
       text-align: center;
+      margin-bottom: 20px;
     }
 
-    .countries-section h3 {
+    .panel-header h3 {
+      margin: 0 0 8px 0;
+      font-size: 1.3rem;
       color: #333;
-      margin-bottom: 20px;
-      font-size: 1.2rem;
-      padding: 0 16px;
+    }
+
+    .distance-info {
+      font-size: 14px;
+      color: #666;
+      font-style: italic;
     }
 
     .country-cards {
       display: flex;
       flex-direction: column;
       gap: 12px;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
     }
 
     .country-card {
-      background: white;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 16px;
       padding: 16px;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      transition: all 0.2s;
-      cursor: pointer;
       border: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .country-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(78, 205, 196, 0.1), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .country-card:hover::before {
+      left: 100%;
     }
 
     .country-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
     }
 
     .country-card.selected {
       border-color: #4ECDC4;
-      background: #f0fdfc;
+      background: rgba(78, 205, 196, 0.1);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(78, 205, 196, 0.3);
     }
 
-    .country-flag {
-      width: 40px;
-      height: auto;
-      border-radius: 4px;
-      flex-shrink: 0;
+    .card-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .country-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
     .country-number {
-      background: #FF6B6B;
+      background: linear-gradient(45deg, #FF6B6B, #FFD93D);
       color: white;
-      width: 32px;
-      height: 32px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -360,7 +386,14 @@ import {Observable} from 'rxjs';
     }
 
     .selected .country-number {
-      background: #4ECDC4;
+      background: linear-gradient(45deg, #4ECDC4, #45B7B8);
+    }
+
+    .country-flag {
+      width: 45px;
+      height: auto;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     .country-info {
@@ -368,7 +401,6 @@ import {Observable} from 'rxjs';
       flex-direction: column;
       gap: 6px;
       flex: 1;
-      text-align: left;
     }
 
     .country-name {
@@ -378,186 +410,317 @@ import {Observable} from 'rxjs';
     }
 
     .country-distance {
-      font-size: 14px;
+      font-size: 13px;
       color: #666;
-      background: #f8f9fa;
-      padding: 4px 10px;
-      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 4px 12px;
+      border-radius: 15px;
       align-self: flex-start;
+      border: 1px solid rgba(0, 0, 0, 0.05);
     }
 
-    .success-screen {
-      min-height: 80vh;
+    .selection-indicator {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #4ECDC4;
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 14px;
+      font-weight: bold;
     }
 
-    .success-header {
+    .btn-validate {
+      background: linear-gradient(45deg, #4ECDC4, #45B7B8);
+      color: white;
+      border: none;
+      padding: 16px 28px;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      min-height: 54px;
+    }
+
+    .btn-validate:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
+    }
+
+    .btn-validate:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Écran de succès */
+    .success-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+
+    .success-background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      opacity: 0.95;
+    }
+
+    .success-content {
+      position: relative;
+      z-index: 1;
       text-align: center;
-      padding: 32px 16px;
+      color: white;
+      animation: successPop 0.8s ease-out;
     }
 
-    .success-header h1 {
-      color: #333;
-      margin-bottom: 32px;
+    .success-title {
       font-size: 2.5rem;
-    }
-
-    .success-content h2 {
-      color: #4ECDC4;
       margin-bottom: 16px;
-      font-size: 1.8rem;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
     }
 
-    .success-content p {
-      color: #666;
+    .celebration {
+      font-size: 1.5rem;
+      margin-bottom: 32px;
+      animation: bounce 2s infinite;
+    }
+
+    .result-card {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 32px;
+      margin: 32px 0;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .result-text {
+      font-size: 1.2rem;
       margin-bottom: 24px;
-      font-size: 1.1rem;
+      opacity: 0.9;
     }
 
     .selected-country {
-      background: white;
-      padding: 24px;
-      border-radius: 16px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-      margin: 24px 0;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 16px;
     }
 
-    .country-name-large {
-      font-size: 2rem;
-      font-weight: bold;
-      color: #333;
-      text-align: center;
-    }
-
     .success-flag {
       width: 80px;
       height: auto;
-      border-radius: 8px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .country-name-large {
+      font-size: 2.5rem;
+      font-weight: bold;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-back {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 16px 32px;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-back:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    /* Spinner et messages d'erreur */
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid transparent;
+      border-top: 2px solid currentColor;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .error-message {
+      background: rgba(214, 48, 49, 0.95);
+      backdrop-filter: blur(10px);
+      color: white;
+      padding: 16px 20px;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 400px;
+      text-align: left;
+      box-shadow: 0 4px 20px rgba(214, 48, 49, 0.3);
     }
 
     .suspense-text {
-      text-align: center;
       font-size: 14px;
     }
 
+    /* Animations */
+    @keyframes slideInFromTop {
+      from {
+        opacity: 0;
+        transform: translateY(-50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInFromLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slideInFromRight {
+      from {
+        opacity: 0;
+        transform: translateX(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes successPop {
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+      }
+      40% {
+        transform: translateY(-10px);
+      }
+      60% {
+        transform: translateY(-5px);
+      }
+    }
+
     /* Responsive Design */
-    @media (max-width: 480px) {
-      .container {
-        padding: 12px;
+    @media (max-width: 768px) {
+      .overlay {
+        padding: 16px;
+        gap: 16px;
       }
 
-      .header h1 {
-        font-size: 2rem;
+      .floating-header {
+        padding: 20px;
       }
 
-      .country-input {
-        padding: 12px 14px;
-        font-size: 16px;
+      .app-title {
+        font-size: 1.8rem;
+      }
+
+      .app-subtitle {
+        font-size: 0.9rem;
       }
 
       .btn-generate {
-        padding: 14px 20px;
-        font-size: 15px;
+        min-width: 260px;
+        padding: 16px 24px;
       }
 
-      .btn-go {
-        padding: 14px 24px;
-        font-size: 16px;
+      .countries-panel {
+        padding: 20px;
+        max-height: 45vh;
       }
 
       .country-card {
         padding: 14px;
-        gap: 12px;
       }
 
       .country-name {
         font-size: 16px;
       }
 
-      .country-number {
-        width: 28px;
-        height: 28px;
-        font-size: 14px;
-      }
-
       .country-flag {
-        width: 35px;
+        width: 40px;
       }
 
-      .countries-section h3 {
-        font-size: 1.1rem;
-        padding: 0 8px;
-      }
-
-      .success-header h1 {
+      .success-title {
         font-size: 2rem;
       }
 
-      .success-content h2 {
-        font-size: 1.5rem;
-      }
-
       .country-name-large {
-        font-size: 1.6rem;
+        font-size: 2rem;
       }
 
       .success-flag {
         width: 60px;
       }
-
-      .selected-country {
-        padding: 20px;
-        margin: 20px 0;
-      }
     }
 
-    @media (min-width: 768px) {
-      .input-row {
-        flex-direction: row;
-        justify-content: center;
-        align-items: flex-end;
-        gap: 20px;
-      }
-
-      .input-group {
-        max-width: 300px;
-      }
-
-      .btn-generate {
-        max-width: 280px;
+    @media (min-width: 1024px) {
+      .overlay {
+        padding: 32px;
+        gap: 24px;
       }
 
       .country-cards {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         gap: 16px;
-        max-width: 900px;
-        margin: 0 auto 16px;
-      }
-
-      .country-card {
-        min-height: 80px;
-      }
-
-      .btn-go {
-        max-width: 250px;
-      }
-    }
-
-    @media (min-width: 1024px) {
-      .container {
-        padding: 20px;
-      }
-
-      .country-cards {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
       }
     }
   `]
@@ -576,10 +739,15 @@ export class AppComponent {
   Math = Math;
   selectedCountry: Country | null = null;
   submitted = false;
+  allCountries: SqlCountry[] = [];
 
   constructor(private countryService: CountryService) {
     this.doneCountry$ = this.countryService.getDoneCountry();
-    this.doneCountry$.pipe().subscribe((country) => this.inputCountry = country.name)
+    this.countryService.getAllMyCountries().subscribe((countries) => {
+      this.allCountries = countries;
+    })
+
+    this.doneCountry$.pipe().subscribe((country) => this.inputCountry = country.name);
   }
 
   generateDistantCountries(): void {
@@ -608,9 +776,10 @@ export class AppComponent {
 
     // Faire l'appel API en parallèle mais attendre 5 secondes minimum
     const apiCall = this.countryService.getDistantCountries(
-      this.inputCountry.trim(),
+      this.inputCountry?.trim(),
       this.minDistance,
-      3
+      3,
+      this.allCountries
     );
 
     const suspenseDelay = new Promise(resolve => setTimeout(resolve, 5000));

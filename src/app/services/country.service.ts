@@ -31,9 +31,9 @@ export class CountryService {
     return degrees * Math.PI / 180;
   }
 
-  getDistantCountries(inputCountry: string | null = null, minDistanceKm = 1500, count = 3) {
+  getDistantCountries(inputCountry: string | null = null, minDistanceKm = 1500, count = 3, allSqlCountries: SqlCountry[] = []) {
     const allCountries$ = this.http.get<any[]>(`${this.baseUrl}/all?fields=name,latlng,flags`);
-
+    const allSqlCountriesStrings = allSqlCountries.flatMap(country => country.name);
     // Si pas de pays de référence, on récupère juste tous les pays
     if (!inputCountry || inputCountry.trim() === '') {
       return allCountries$.pipe(
@@ -41,6 +41,7 @@ export class CountryService {
           // Filtrer les pays avec coordonnées valides
           const validCountries = allCountries
             .filter(c => c.latlng && c.latlng.length === 2)
+            .filter(c => !allSqlCountriesStrings.includes(c.name.common))
             .map(c => ({
               name: c.name.common,
               lat2: c.latlng[0],
@@ -153,6 +154,10 @@ export class CountryService {
 
   getDoneCountry() {
     return this.http.get<SqlCountry>(`${this.apiBaseUrl}.netlify/functions/getDoneCountries`)
+  }
+
+  getAllMyCountries() {
+    return this.http.get<SqlCountry[]>(`${this.apiBaseUrl}.netlify/functions/getAll`)
   }
 
   postNextCountry(countryName: string) {

@@ -19,8 +19,11 @@ export interface Country {
       <div id="map" class="map"></div>
       @if (selectedCountries.length > 0) {
         <div class="map-controls">
-          <button class="btn btn-primary" (click)="centerOnCountries()">
-            Centrer sur les pays
+          <button class="btn btn-primary" (click)="centerOnCountries()" title="Centrer sur les pays sélectionnés">
+            <span class="btn-icon">🎯</span>
+          </button>
+          <button class="btn btn-secondary" (click)="resetView()" title="Vue mondiale">
+            <span class="btn-icon">🌍</span>
           </button>
         </div>
       }
@@ -28,22 +31,24 @@ export interface Country {
   `,
   styles: [`
     .map-container {
-      position: relative;
-      width: 100%;
-      height: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
     }
 
     .map {
-      height: 500px;
       width: 100%;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      height: 100%;
+      filter: saturate(1.1) contrast(1.05);
     }
 
     .map-controls {
       position: absolute;
-      top: 10px;
-      right: 10px;
+      bottom: 20px;
+      right: 20px;
       z-index: 1000;
       display: flex;
       flex-direction: column;
@@ -51,34 +56,66 @@ export interface Country {
     }
 
     .btn {
-      padding: 8px 12px;
+      width: 48px;
+      height: 48px;
       border: none;
-      border-radius: 4px;
+      border-radius: 24px;
       cursor: pointer;
-      font-size: 12px;
-      transition: background-color 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.25);
     }
 
     .btn-primary {
-      background-color: #007bff;
+      background: rgba(78, 205, 196, 0.9);
       color: white;
     }
 
     .btn-primary:hover {
-      background-color: #0056b3;
+      background: rgba(78, 205, 196, 1);
     }
 
     .btn-secondary {
-      background-color: #6c757d;
+      background: rgba(108, 117, 125, 0.9);
       color: white;
     }
 
     .btn-secondary:hover {
-      background-color: #545b62;
+      background: rgba(108, 117, 125, 1);
+    }
+
+    .btn-icon {
+      font-size: 18px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .map-controls {
+        bottom: 16px;
+        right: 16px;
+      }
+
+      .btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 22px;
+      }
+
+      .btn-icon {
+        font-size: 16px;
+      }
     }
   `]
-})
-export class MapComponent implements OnInit, OnDestroy, OnChanges {
+})export class MapComponent implements OnInit, OnDestroy, OnChanges {
   @Input() selectedCountries: Country[] = [];
   @Input() selectedCountry: Country | null = null;
 
