@@ -1,8 +1,9 @@
 import {Component, ViewChild} from '@angular/core';
 import {Country, MapComponent} from './components/map.component';
 import {FormsModule} from '@angular/forms';
-import {CountryService} from './services/country.service';
-import {AsyncPipe} from '@angular/common';
+import {CountryService, SqlCountry} from './services/country.service';
+import {Observable} from 'rxjs';
+import {NgClass} from '@angular/common';
 
 @Component({
   selector: 'app-root',
@@ -10,12 +11,6 @@ import {AsyncPipe} from '@angular/common';
     <div class="container">
       <div class="header">
         <h1>Pays Distants Aléatoires</h1>
-        <h2>Pays déjà faits:</h2>
-        <ul>
-          @for (country of (doneCountries$ | async); track country) {
-            <li>{{ country }}</li>
-          }
-        </ul>
         <div class="input-section">
           <div class="input-group">
             <input
@@ -61,8 +56,8 @@ import {AsyncPipe} from '@angular/common';
           <h3>Pays trouvés (distants de {{ inputCountry }}) :</h3>
           <div class="country-cards">
             @for (country of selectedCountries; track country.name; let i = $index) {
-              <div class="country-card">
-                <span class="country-number">{{ i + 1 }}</span>
+              <div class="country-card" (click)="selectedCountry = (country.name)">
+                <span class="country-number" [ngClass]="{'selected' : selectedCountry === country.name}">{{ i + 1 }}</span>
                 <div class="country-info">
                   <span class="country-name">{{ country.name }}</span>
                   @if (country.distance) {
@@ -73,6 +68,12 @@ import {AsyncPipe} from '@angular/common';
             }
           </div>
         </div>
+        <button
+          class="btn-generate"
+          (click)="selectCountry()"
+        >
+Go
+        </button>
       }
 
       <app-map
@@ -84,7 +85,7 @@ import {AsyncPipe} from '@angular/common';
   imports: [
     MapComponent,
     FormsModule,
-    AsyncPipe
+    NgClass
   ],
   styles: [`
     .container {
@@ -226,6 +227,7 @@ import {AsyncPipe} from '@angular/common';
       gap: 15px;
       transition: transform 0.2s;
       min-width: 200px;
+      cursor: pointer;
     }
 
     .country-card:hover {
@@ -244,6 +246,10 @@ import {AsyncPipe} from '@angular/common';
       font-weight: bold;
       font-size: 14px;
       flex-shrink: 0;
+    }
+
+     .selected {
+      background: #706bff;
     }
 
     .country-info {
@@ -297,12 +303,14 @@ export class AppComponent {
   isLoading: boolean = false;
   errorMessage: string = '';
   suspenseMessage: string = '';
-  doneCountries$;
+  doneCountry$: Observable<SqlCountry>;
   // Expose Math pour le template
   Math = Math;
+  selectedCountry: string | null = null;
 
   constructor(private countryService: CountryService) {
-    this.doneCountries$ = this.countryService.getDoneCountries()
+    this.doneCountry$ = this.countryService.getDoneCountry();
+    this.doneCountry$.pipe().subscribe((country) => this.inputCountry = country.name)
   }
 
   generateDistantCountries(): void {
@@ -374,5 +382,12 @@ export class AppComponent {
         this.isLoading = false;
         this.suspenseMessage = '';
       });
+  }
+
+  selectCountry() {
+    if(this.selectedCountry && this.selectedCountry !== ''){
+      this.countryService.postNextCountry(this.selectedCountry).subscribe()
+    }
+
   }
 }

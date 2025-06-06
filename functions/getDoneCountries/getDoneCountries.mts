@@ -18,17 +18,22 @@ require("dotenv").config();
 // }
 
 export async function handler(event) {
-  const sql = neon(process.env.DATABASE_URL);
   try {
-    const rows = await sql('SELECT * FROM countries;');
+    const sql = neon(process.env.DATABASE_URL);
+    const rows = await sql.query('SELECT * FROM countries order by date desc limit 1;');
     return {
       statusCode: 200,
-      body: JSON.stringify(rows),
+      body: JSON.stringify(rows.length ? rows[0] : {}), headers: {
+        'access-control-allow-origin': '*'
+      }
+
     };
   } catch (error) {
     return {
       statusCode: 500,
-      body: JSON.stringify(error),
+      body: JSON.stringify(error), headers: {
+        'access-control-allow-origin': '*'
+      }
     };
   }
 }
