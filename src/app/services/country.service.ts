@@ -25,6 +25,7 @@ export class CountryService {
   }
 
   getDistantCountries(inputCountry: string, minDistanceKm = 1500, count = 3) {
+    this.getDoneCountries();
     const allCountries$ = this.http.get<any[]>(`${this.baseUrl}/all?fields=name,latlng`);
     const targetCountry$ = this.http.get<any[]>(`${this.baseUrl}/name/${inputCountry}`);
 
@@ -46,5 +47,9 @@ export class CountryService {
         return distantCountries.slice(0, count);
       })
     );
+
+  }
+
+  getDoneCountries() {
   }
 }
