@@ -1,0 +1,8 @@
+[build]
+publish = "dist/bouffe"
+command = "ng build --prod"
+functions = "./functions"
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200
