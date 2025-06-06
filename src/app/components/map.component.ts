@@ -17,16 +17,6 @@ export interface Country {
   template: `
     <div class="map-container">
       <div id="map" class="map"></div>
-      @if (selectedCountries.length > 0) {
-        <div class="map-controls">
-          <button class="btn btn-primary" (click)="centerOnCountries()" title="Centrer sur les pays sélectionnés">
-            <span class="btn-icon">🎯</span>
-          </button>
-          <button class="btn btn-secondary" (click)="resetView()" title="Vue mondiale">
-            <span class="btn-icon">🌍</span>
-          </button>
-        </div>
-      }
     </div>
   `,
   styles: [`

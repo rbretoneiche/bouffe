@@ -284,6 +284,7 @@ import {Observable} from 'rxjs';
 
     /* Panel des pays */
     .countries-panel {
+      align-self: start;
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(10px);
       border-radius: 20px;
@@ -709,11 +710,14 @@ import {Observable} from 'rxjs';
       .success-flag {
         width: 60px;
       }
+      .countries-panel{
+        align-self: unset;
+      }
     }
 
     @media (min-width: 1024px) {
       .overlay {
-        padding: 32px;
+        padding: 52px;
         gap: 24px;
       }
 
