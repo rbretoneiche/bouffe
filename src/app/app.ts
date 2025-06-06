@@ -182,6 +182,8 @@ import {Observable} from 'rxjs';
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
       border: 1px solid rgba(255, 255, 255, 0.2);
       animation: slideInFromTop 0.6s ease-out;
+      width: 50%;
+      margin: 0 auto;
     }
 
     .app-title {
