@@ -1,6 +1,7 @@
 import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {forkJoin, map} from 'rxjs';
+import {environment} from '../../environments/environment';
 
 export interface SqlCountry {
   name: string
@@ -9,6 +10,7 @@ export interface SqlCountry {
 @Injectable({providedIn: 'root'})
 export class CountryService {
   private baseUrl = 'https://restcountries.com/v3.1';
+  private apiBaseUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {
   }
@@ -55,12 +57,12 @@ export class CountryService {
   }
 
   getDoneCountry() {
-    return this.http.get<SqlCountry>('http://localhost:7000/.netlify/functions/getDoneCountries')
+    return this.http.get<SqlCountry>(`${this.apiBaseUrl}.netlify/functions/getDoneCountries`)
   }
 
   postNextCountry(countryName: string) {
 
-    return this.http.post<void>('http://localhost:7000/.netlify/functions/postNextCountry', {countryName});
+    return this.http.post<void>(`${this.apiBaseUrl}.netlify/functions/postNextCountry`, {countryName});
   }
 
 
