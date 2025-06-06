@@ -1,5 +1,5 @@
 [build]
-  publish = "dist/angular-netlify-functions-starter"
+  publish = "dist/bouffe/browser"
   command = "ng build --prod"
   functions = "./functions"
 [[redirects]]
