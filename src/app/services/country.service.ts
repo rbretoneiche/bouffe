@@ -30,7 +30,7 @@ export class CountryService {
   }
 
   getDistantCountries(inputCountry: string, minDistanceKm = 1500, count = 3) {
-    const allCountries$ = this.http.get<any[]>(`${this.baseUrl}/all?fields=name,latlng`);
+    const allCountries$ = this.http.get<any[]>(`${this.baseUrl}/all?fields=name,latlng,flags`);
     const targetCountry$ = this.http.get<any[]>(`${this.baseUrl}/name/${inputCountry}`);
 
     return forkJoin([targetCountry$, allCountries$]).pipe(
@@ -43,7 +43,7 @@ export class CountryService {
           .map(c => {
             const [lat2, lon2] = c.latlng;
             const distance = this.getDistance(lat1, lon1, lat2, lon2);
-            return {name: c.name.common, distance, lat2, lon2};
+            return {name: c.name.common, distance, lat2, lon2, flag: c.flags.svg};
           })
           .filter(c => c.distance >= minDistanceKm)
           .sort(() => Math.random() - 0.5) // shuffle

@@ -9,77 +9,97 @@ import {NgClass} from '@angular/common';
   selector: 'app-root',
   template: `
     <div class="container">
-      <div class="header">
-        <h1>Pays Distants Aléatoires</h1>
-        <div class="input-section">
-          <div class="input-group">
-            <input
-              type="text"
-              [(ngModel)]="inputCountry"
-              placeholder="Entrez un pays de référence (ex: France)"
-              class="country-input"
-              (keyup.enter)="generateDistantCountries()"
-            >
-            <input
-              type="number"
-              [(ngModel)]="minDistance"
-              placeholder="Distance min (km)"
-              class="distance-input"
-              min="500"
-              max="20000"
-            >
+      @if (!submitted) {
+        <div class="header">
+          <h1>BOUFFE</h1>
+
+
+          <div class="input-section">
+            <div class="row">
+              <div class="input-group">
+                <span style="align-self: center">Dernier pays visité: </span>
+                <input
+                  disabled
+                  type="text"
+                  [(ngModel)]="inputCountry"
+                  placeholder="Entrez un pays de référence (ex: France)"
+                  class="country-input"
+                  (keyup.enter)="generateDistantCountries()"
+                >
+              </div>
+
+              <button
+                class="btn-generate"
+                (click)="generateDistantCountries()"
+                [disabled]="!inputCountry.trim() || isLoading"
+              >
+                @if (isLoading) {
+                  <span class="spinner"></span>
+                  <span class="suspense-text">{{ suspenseMessage }}</span>
+                } @else if (!selectedCountries.length) {
+                  🌍 Trouver 3 pays distants
+                } @else {
+                  🌍 Recommencer
+                }
+              </button>
+            </div>
           </div>
 
-          <button
-            class="btn-generate"
-            (click)="generateDistantCountries()"
-            [disabled]="!inputCountry.trim() || isLoading"
-          >
-            @if (isLoading) {
-              <span class="spinner"></span>
-              <span class="suspense-text">{{ suspenseMessage }}</span>
-            } @else {
-              🌍 Trouver 3 pays distants
-            }
-          </button>
+          @if (errorMessage) {
+            <div class="error-message">
+              {{ errorMessage }}
+            </div>
+          }
         </div>
 
-        @if (errorMessage) {
-          <div class="error-message">
-            {{ errorMessage }}
+        @if (selectedCountries.length > 0) {
+          <div class="countries-list">
+            <h3>Pays trouvés (distants de {{ inputCountry }}) :</h3>
+            <div class="row">
+              <div class="country-cards">
+                @for (country of selectedCountries; track country.name; let i = $index) {
+                  <div class="country-card" (click)="selectedCountry = (country)">
+                    <div class="country-number"
+                         [ngClass]="{'selected' : selectedCountry?.name === country.name}">{{ i + 1 }}
+                    </div>
+                    <div class="country-info">
+                      <span class="country-name">{{ country.name }}</span>
+                      @if (country.distance) {
+                        <span class="country-distance">{{ Math.round(country.distance) }} km</span>
+                      }
+                    </div>                      @if (country.flag) {
+                    <img [src]="country.flag">
+                  }
+
+                  </div>
+                }
+              </div>
+              <button
+                class="btn-go"
+                (click)="selectCountry()"
+              >
+                @if (isLoading) {
+                  <span class="spinner"></span>
+                }
+                Go !
+              </button>
+
+            </div>
           </div>
         }
-      </div>
 
-      @if (selectedCountries.length > 0) {
-        <div class="countries-list">
-          <h3>Pays trouvés (distants de {{ inputCountry }}) :</h3>
-          <div class="country-cards">
-            @for (country of selectedCountries; track country.name; let i = $index) {
-              <div class="country-card" (click)="selectedCountry = (country.name)">
-                <span class="country-number" [ngClass]="{'selected' : selectedCountry === country.name}">{{ i + 1 }}</span>
-                <div class="country-info">
-                  <span class="country-name">{{ country.name }}</span>
-                  @if (country.distance) {
-                    <span class="country-distance">{{ Math.round(country.distance) }} km</span>
-                  }
-                </div>
-              </div>
-            }
-          </div>
+        <app-map
+          #mapComponent
+          [selectedCountries]="selectedCountries">
+        </app-map>
+      } @else {
+        <div class="header">
+          <h1>BOUFFE</h1>
+          <h2>Félicitation, votre prochaine bouffe sera sur le thème du : {{ selectedCountry?.name }}</h2>
+          <img [src]="selectedCountry?.flag">
+          <button class="btn-generate" style="justify-self: center" (click)="reset()">Retour en arrière</button>
         </div>
-        <button
-          class="btn-generate"
-          (click)="selectCountry()"
-        >
-Go
-        </button>
       }
-
-      <app-map
-        #mapComponent
-        [selectedCountries]="selectedCountries">
-      </app-map>
     </div>
   `,
   imports: [
@@ -113,7 +133,6 @@ Go
       display: flex;
       gap: 15px;
       justify-content: center;
-      margin-bottom: 20px;
       flex-wrap: wrap;
     }
 
@@ -158,7 +177,6 @@ Go
       display: flex;
       align-items: center;
       gap: 10px;
-      margin: 0 auto;
     }
 
     .btn-generate:hover:not(:disabled) {
@@ -167,6 +185,32 @@ Go
     }
 
     .btn-generate:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-go {
+      background: linear-gradient(45deg, #6bcbff, #FFD93D);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-go:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-go:disabled {
       opacity: 0.6;
       cursor: not-allowed;
       transform: none;
@@ -198,6 +242,13 @@ Go
       margin: 15px auto;
       max-width: 500px;
       border-left: 4px solid #d63031;
+    }
+
+    .row {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      align-items: center;
     }
 
     .countries-list {
@@ -234,6 +285,11 @@ Go
       transform: translateY(-2px);
     }
 
+    .country-card img{
+      width: 50px;
+      height: auto;
+    }
+
     .country-number {
       background: #FF6B6B;
       color: white;
@@ -248,7 +304,7 @@ Go
       flex-shrink: 0;
     }
 
-     .selected {
+    .selected {
       background: #706bff;
     }
 
@@ -306,7 +362,8 @@ export class AppComponent {
   doneCountry$: Observable<SqlCountry>;
   // Expose Math pour le template
   Math = Math;
-  selectedCountry: string | null = null;
+  selectedCountry: Country | null = null;
+  submitted = false;
 
   constructor(private countryService: CountryService) {
     this.doneCountry$ = this.countryService.getDoneCountry();
@@ -322,7 +379,6 @@ export class AppComponent {
     this.isLoading = true;
     this.errorMessage = '';
     this.selectedCountries = [];
-
     // Messages de suspense qui changent pendant l'animation
     const suspenseMessages = [
       '🔍 Recherche de pays lointains...',
@@ -364,7 +420,8 @@ export class AppComponent {
           name: country.name,
           lat: country.lat2,
           lng: country.lon2,
-          distance: country.distance
+          distance: country.distance,
+          flag: country.flag
         }));
 
         if (this.selectedCountries.length === 0) {
@@ -385,9 +442,21 @@ export class AppComponent {
   }
 
   selectCountry() {
-    if(this.selectedCountry && this.selectedCountry !== ''){
-      this.countryService.postNextCountry(this.selectedCountry).subscribe()
+    if (this.selectedCountry && this.selectedCountry.name !== '') {
+      this.isLoading = true;
+      this.countryService.postNextCountry(this.selectedCountry.name).subscribe(() => {
+        this.submitted = true;
+        this.isLoading = false;
+
+      })
     }
 
+  }
+
+  reset() {
+    this.submitted = false;
+    this.inputCountry = this.selectedCountry?.name ?? '';
+    this.selectedCountry = null;
+    this.selectedCountries = [];
   }
 }

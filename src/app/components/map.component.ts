@@ -9,6 +9,7 @@ export interface Country {
   lat: number;
   lng: number;
   distance?: number; // Distance depuis le pays de référence
+  flag?: string; // Distance depuis le pays de référence
 }
 
 @Component({
