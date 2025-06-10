@@ -749,18 +749,87 @@ import {NgClass} from '@angular/common';
         margin: 0;
         padding: 0;
         box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.2);
-        animation: slideUpFromBottom 0.6s ease-out;
+
+        /* État fermé par défaut */
         height: 6vh;
-        /* Permettre le scroll interne */
         overflow: hidden;
         display: flex;
         flex-direction: column;
+
+        /* Transition pour l'animation */
+        transition: height 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+        transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+        /* Position initiale (légèrement en dessous) */
+        transform: translateY(0);
       }
 
+      /* État ouvert */
       .countries-panel.opened {
-        height: auto;
+        height: 60vh; /* ou auto si vous préférez */
+        transform: translateY(0);
       }
 
+      /* Animation d'entrée initiale (optionnelle) */
+      @keyframes slideUpFromBottom {
+        from {
+          transform: translateY(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      /* Si vous voulez une animation d'entrée initiale */
+      .countries-panel.initial-load {
+        animation: slideUpFromBottom 0.6s ease-out;
+      }
+
+      /* Animation plus fluide avec backdrop (optionnel) */
+      .drawer-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.3);
+        z-index: 1999;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+      }
+
+      .drawer-backdrop.opened {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      /* Variante avec transform uniquement (plus performant) */
+      .countries-panel-transform {
+        position: fixed;
+        bottom: 0;
+        left: calc(50% - 200px);
+        right: 0;
+        z-index: 2000;
+        height: 60vh;
+        border-radius: 24px 24px 0 0;
+        margin: 0;
+        padding: 0;
+        box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+
+        /* Animation avec transform (plus performant) */
+        transform: translateY(calc(100% - 6vh));
+        transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+      }
+
+      .countries-panel-transform.opened {
+        transform: translateY(0);
+      }
       /* Header du drawer */
       .panel-header {
         padding: 20px 20px 16px 20px;
@@ -1024,5 +1093,6 @@ export class AppComponent {
     this.inputCountry = this.selectedCountry?.name ?? '';
     this.selectedCountry = null;
     this.selectedCountries = [];
+    this.drawerOpened = false;
   }
 }
