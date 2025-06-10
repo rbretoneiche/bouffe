@@ -295,7 +295,6 @@ export class MapComponent implements OnInit, OnDestroy, OnChanges {
         const lng = Math.random() * (northEast.lng - southWest.lng) + southWest.lng;
 
         const marker = L.marker([lat, lng], { icon: this.suspenseIcon, zIndexOffset: 5000 }).addTo(this.map);
-console.log(marker)
         const markerElement = marker.getElement();
         if (markerElement) {
           markerElement.style.opacity = '0';
