@@ -3,6 +3,7 @@ import {Country, MapComponent} from './components/map.component';
 import {FormsModule} from '@angular/forms';
 import {CountryService, SqlCountry} from './services/country.service';
 import {Observable} from 'rxjs';
+import {NgClass} from '@angular/common';
 
 @Component({
   selector: 'app-root',
@@ -60,58 +61,58 @@ import {Observable} from 'rxjs';
           </div>
 
           <!-- Panel des pays trouvés -->
-        <!-- Remplacer la section "Panel des pays trouvés" par cette structure -->
+          <!-- Remplacer la section "Panel des pays trouvés" par cette structure -->
 
-        @if (selectedCountries.length > 0) {
-          <div class="countries-panel">
-            <div class="panel-header">
-              <h3>🎲 Destinations trouvées</h3>
-              <span class="distance-info">Distantes de {{ inputCountry }}</span>
-            </div>
-
-            <div class="countries-scroll-area">
-              <div class="country-cards">
-                @for (country of selectedCountries; track country.name; let i = $index) {
-                  <div class="country-card"
-                       (click)="selectedCountry = country"
-                       [class.selected]="selectedCountry?.name === country.name">
-                    <div class="card-content">
-                      <div class="country-header">
-                        <div class="country-number">{{ i + 1 }}</div>
-                        @if (country.flag) {
-                          <img [src]="country.flag" class="country-flag" alt="Drapeau {{ country.name }}">
-                        }
-                      </div>
-                      <div class="country-info">
-                        <span class="country-name">{{ country.name }}</span>
-                        @if (country.distance) {
-                          <span class="country-distance">🛫 {{ Math.round(country.distance) }} km</span>
-                        }
-                      </div>
-                    </div>
-                    @if (selectedCountry?.name === country.name) {
-                      <div class="selection-indicator">✓</div>
-                    }
-                  </div>
-                }
+          @if (selectedCountries.length > 0) {
+            <div class="countries-panel" [ngClass]="{'opened': drawerOpened}">
+              <div class="panel-header" (click)="drawerOpened = !drawerOpened">
+                <h3>🎲 Destinations trouvées</h3>
+                <span class="distance-info">Distantes de {{ inputCountry }}</span>
               </div>
-            </div>
 
-            <button
-              class="btn-validate"
-              (click)="selectCountry()"
-              [disabled]="!selectedCountry || isLoading"
-            >
-              @if (isLoading) {
-                <span class="spinner"></span>
-                <span>Validation...</span>
-              } @else {
-                <span class="btn-icon">🎉</span>
-                <span class="btn-text">Valider ma sélection</span>
-              }
-            </button>
-          </div>
-        }
+              <div class="countries-scroll-area">
+                <div class="country-cards">
+                  @for (country of selectedCountries; track country.name; let i = $index) {
+                    <div class="country-card"
+                         (click)="selectedCountry = country"
+                         [class.selected]="selectedCountry?.name === country.name">
+                      <div class="card-content">
+                        <div class="country-header">
+                          <div class="country-number">{{ i + 1 }}</div>
+                          @if (country.flag) {
+                            <img [src]="country.flag" class="country-flag" alt="Drapeau {{ country.name }}">
+                          }
+                        </div>
+                        <div class="country-info">
+                          <span class="country-name">{{ country.name }}</span>
+                          @if (country.distance) {
+                            <span class="country-distance">🛫 {{ Math.round(country.distance) }} km</span>
+                          }
+                        </div>
+                      </div>
+                      @if (selectedCountry?.name === country.name) {
+                        <div class="selection-indicator">✓</div>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <button
+                class="btn-validate"
+                (click)="selectCountry()"
+                [disabled]="!selectedCountry || isLoading"
+              >
+                @if (isLoading) {
+                  <span class="spinner"></span>
+                  <span>Validation...</span>
+                } @else {
+                  <span class="btn-icon">🎉</span>
+                  <span class="btn-text">Valider ma sélection</span>
+                }
+              </button>
+            </div>
+          }
         </div>
       } @else {
         <!-- Écran de succès -->
@@ -145,6 +146,7 @@ import {Observable} from 'rxjs';
   imports: [
     MapComponent,
     FormsModule,
+    NgClass,
   ],
   styles: [`
     .app-container {
@@ -183,10 +185,9 @@ import {Observable} from 'rxjs';
       border-radius: 25px;
       padding: 32px 28px;
       text-align: center;
-      box-shadow:
-        0 20px 40px rgba(0, 0, 0, 0.1),
-        0 8px 20px rgba(0, 0, 0, 0.05),
-        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1),
+      0 8px 20px rgba(0, 0, 0, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6);
       border: 1px solid rgba(255, 255, 255, 0.3);
       animation: slideInFromTop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
       width: 100%;
@@ -195,6 +196,7 @@ import {Observable} from 'rxjs';
       position: relative;
       overflow: hidden;
     }
+
     .app-title {
       margin: 0 0 8px 0;
       font-size: 2.2rem;
@@ -308,6 +310,7 @@ import {Observable} from 'rxjs';
       max-width: 400px; /* Limiter la largeur sur desktop */
       width: 100%;
     }
+
     /* Modifications pour desktop */
     @media (min-width: 1024px) {
       .overlay {
@@ -333,7 +336,6 @@ import {Observable} from 'rxjs';
         gap: 12px;
       }
     }
-
 
 
     .panel-header {
@@ -748,11 +750,15 @@ import {Observable} from 'rxjs';
         padding: 0;
         box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.2);
         animation: slideUpFromBottom 0.6s ease-out;
-
+        height: 6vh;
         /* Permettre le scroll interne */
         overflow: hidden;
         display: flex;
         flex-direction: column;
+      }
+
+      .countries-panel.opened {
+        height: auto;
       }
 
       /* Header du drawer */
@@ -763,6 +769,7 @@ import {Observable} from 'rxjs';
         border-radius: 24px 24px 0 0;
         flex-shrink: 0;
         position: relative;
+        cursor: pointer;
       }
 
       /* Handle pour indiquer qu'on peut faire glisser */
@@ -849,7 +856,9 @@ import {Observable} from 'rxjs';
       }
 
       @keyframes fadeIn {
-        to { opacity: 1; }
+        to {
+          opacity: 1;
+        }
       }
 
       /* Assurer que la carte est visible */
@@ -892,6 +901,7 @@ import {Observable} from 'rxjs';
         font-size: 15px;
       }
     }
+
     @media (min-width: 1024px) {
       .overlay {
         padding: 52px;
@@ -921,6 +931,7 @@ export class AppComponent {
   selectedCountry: Country | null = null;
   submitted = false;
   allCountries: SqlCountry[] = [];
+  drawerOpened = false;
 
   constructor(private countryService: CountryService) {
     this.doneCountry$ = this.countryService.getDoneCountry();
