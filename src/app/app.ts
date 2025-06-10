@@ -733,7 +733,7 @@ import {NgClass} from '@angular/common';
       }
 
       .btn-generate {
-        min-width: 100%;
+        min-width: 80%;
         padding: 16px 24px;
       }
 
