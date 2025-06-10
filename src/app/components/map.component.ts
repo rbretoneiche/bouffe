@@ -110,7 +110,7 @@ export class MapComponent implements OnInit, OnDestroy, OnChanges {
   @Input() selectedCountries: Country[] = [];
   @Input() selectedCountry: Country | null = null;
 
-  private map!: L.Map;
+  private map?: L.Map;
   private markers: L.Marker[] = [];
   private suspenseMarkers: L.Marker[] = [];
   private suspenseInterval: any;
@@ -197,6 +197,9 @@ export class MapComponent implements OnInit, OnDestroy, OnChanges {
 
     // Ajouter les nouveaux marqueurs
     this.selectedCountries.forEach((country, index) => {
+      if(!this.map){
+      return;
+      }
       const marker = L.marker([country.lat, country.lng], {
         icon: this.selectedCountry === country ? this.customSelectedIcon : this.customIcon
       }).addTo(this.map);
@@ -227,7 +230,7 @@ export class MapComponent implements OnInit, OnDestroy, OnChanges {
 
   private clearMarkers(): void {
     this.markers.forEach(marker => {
-      this.map.removeLayer(marker);
+      this.map?.removeLayer(marker);
     });
     this.markers = [];
   }
@@ -243,9 +246,9 @@ export class MapComponent implements OnInit, OnDestroy, OnChanges {
       if (isDesktop) {
         // Décaler la vue vers la droite pour éviter le panel
         const offsetLng = country.lng + 30; // Décalage de 30 degrés vers l'est
-        this.map.setView([country.lat, offsetLng], 6);
+        this.map?.setView([country.lat, offsetLng], 6);
       } else {
-        this.map.setView([country.lat, country.lng], 6);
+        this.map?.setView([country.lat, country.lng], 6);
       }
     } else {
       // Plusieurs pays : ajuster la vue avec padding adaptatif
@@ -255,40 +258,44 @@ export class MapComponent implements OnInit, OnDestroy, OnChanges {
 
       if (isDesktop) {
         // Sur desktop, ajouter du padding à gauche pour compenser le panel
-        this.map.fitBounds(bounds, {
+        this.map?.fitBounds(bounds, {
           paddingTopLeft: [450, 100], // Padding à gauche pour éviter le panel
           paddingBottomRight: [50, 50]
         });
       } else {
-        this.map.fitBounds(bounds.pad(0.1));
+        this.map?.fitBounds(bounds.pad(0.1));
       }
     }
   }
 
-  // Nouvelle méthode pour démarrer l'animation de suspense
   public startSuspenseAnimation(): void {
     this.stopSuspenseAnimation();
     this.clearMarkers();
+    if(!this.map){
+      return;
+    }
 
     let animationCount = 0;
-    const maxAnimations = 25; // Nombre total de pins à afficher pendant l'animation
+    const maxAnimations = 25;
+    const bounds = this.map.getBounds();
+    const southWest = bounds.getSouthWest();
+    const northEast = bounds.getNorthEast();
+
 
     this.suspenseInterval = setInterval(() => {
-      // Supprimer les anciens marqueurs de suspense
+      if(!this.map){
+        return;
+      }
       this.clearSuspenseMarkers();
 
-      // Créer 3-5 nouveaux marqueurs aléatoires
-      const markerCount = Math.floor(Math.random() * 3) + 3;
+      const markerCount = Math.floor(Math.random() * 3) + 3; // 3 à 5 markers
 
       for (let i = 0; i < markerCount; i++) {
-        const lat = (Math.random() - 0.5) * 160; // -80 à 80
-        const lng = (Math.random() - 0.5) * 360; // -180 à 180
+        const lat = Math.random() * (northEast.lat - southWest.lat) + southWest.lat;
+        const lng = Math.random() * (northEast.lng - southWest.lng) + southWest.lng;
 
-        const marker = L.marker([lat, lng], {
-          icon: this.suspenseIcon
-        }).addTo(this.map);
-
-        // Animation d'apparition
+        const marker = L.marker([lat, lng], { icon: this.suspenseIcon, zIndexOffset: 5000 }).addTo(this.map);
+console.log(marker)
         const markerElement = marker.getElement();
         if (markerElement) {
           markerElement.style.opacity = '0';
@@ -296,23 +303,20 @@ export class MapComponent implements OnInit, OnDestroy, OnChanges {
           markerElement.style.transition = 'all 0.3s ease-out';
 
           setTimeout(() => {
-            markerElement.style.opacity = '0.7';
+            markerElement.style.opacity = '1';
             markerElement.style.transform = 'scale(1)';
-          }, 50);
+          }, 100);
         }
 
         this.suspenseMarkers.push(marker);
       }
 
       animationCount++;
-
-      // Arrêter l'animation après le nombre maximum
       if (animationCount >= maxAnimations) {
         this.stopSuspenseAnimation();
       }
-    }, 200); // Nouvelle animation toutes les 200ms
+    }, 500);
   }
-
   // Méthode pour arrêter l'animation de suspense
   public stopSuspenseAnimation(): void {
     if (this.suspenseInterval) {
@@ -325,7 +329,7 @@ export class MapComponent implements OnInit, OnDestroy, OnChanges {
   // Méthode pour supprimer les marqueurs de suspense
   private clearSuspenseMarkers(): void {
     this.suspenseMarkers.forEach(marker => {
-      this.map.removeLayer(marker);
+      this.map?.removeLayer(marker);
     });
     this.suspenseMarkers = [];
   }
