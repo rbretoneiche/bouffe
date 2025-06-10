@@ -234,13 +234,32 @@ export interface Country {
     if (this.selectedCountries.length === 0) return;
 
     if (this.selectedCountries.length === 1) {
-      // Un seul pays : centrer dessus
+      // Un seul pays : centrer avec un décalage vers la droite sur desktop
       const country = this.selectedCountries[0];
-      this.map.setView([country.lat, country.lng], 6);
+      const isDesktop = window.innerWidth >= 1024;
+
+      if (isDesktop) {
+        // Décaler la vue vers la droite pour éviter le panel
+        const offsetLng = country.lng + 30; // Décalage de 30 degrés vers l'est
+        this.map.setView([country.lat, offsetLng], 6);
+      } else {
+        this.map.setView([country.lat, country.lng], 6);
+      }
     } else {
-      // Plusieurs pays : ajuster la vue pour tous les inclure
+      // Plusieurs pays : ajuster la vue avec padding adaptatif
       const group = new L.FeatureGroup(this.markers);
-      this.map.fitBounds(group.getBounds().pad(0.1));
+      const bounds = group.getBounds();
+      const isDesktop = window.innerWidth >= 1024;
+
+      if (isDesktop) {
+        // Sur desktop, ajouter du padding à gauche pour compenser le panel
+        this.map.fitBounds(bounds, {
+          paddingTopLeft: [450, 50], // Padding à gauche pour éviter le panel
+          paddingBottomRight: [50, 50]
+        });
+      } else {
+        this.map.fitBounds(bounds.pad(0.1));
+      }
     }
   }
 

@@ -60,13 +60,16 @@ import {Observable} from 'rxjs';
           </div>
 
           <!-- Panel des pays trouvés -->
-          @if (selectedCountries.length > 0) {
-            <div class="countries-panel">
-              <div class="panel-header">
-                <h3>🎲 Destinations trouvées</h3>
-                <span class="distance-info">Distantes de {{ inputCountry }}</span>
-              </div>
+        <!-- Remplacer la section "Panel des pays trouvés" par cette structure -->
 
+        @if (selectedCountries.length > 0) {
+          <div class="countries-panel">
+            <div class="panel-header">
+              <h3>🎲 Destinations trouvées</h3>
+              <span class="distance-info">Distantes de {{ inputCountry }}</span>
+            </div>
+
+            <div class="countries-scroll-area">
               <div class="country-cards">
                 @for (country of selectedCountries; track country.name; let i = $index) {
                   <div class="country-card"
@@ -92,22 +95,23 @@ import {Observable} from 'rxjs';
                   </div>
                 }
               </div>
-
-              <button
-                class="btn-validate"
-                (click)="selectCountry()"
-                [disabled]="!selectedCountry || isLoading"
-              >
-                @if (isLoading) {
-                  <span class="spinner"></span>
-                  <span>Validation...</span>
-                } @else {
-                  <span class="btn-icon">🎉</span>
-                  <span class="btn-text">Valider ma sélection</span>
-                }
-              </button>
             </div>
-          }
+
+            <button
+              class="btn-validate"
+              (click)="selectCountry()"
+              [disabled]="!selectedCountry || isLoading"
+            >
+              @if (isLoading) {
+                <span class="spinner"></span>
+                <span>Validation...</span>
+              } @else {
+                <span class="btn-icon">🎉</span>
+                <span class="btn-text">Valider ma sélection</span>
+              }
+            </button>
+          </div>
+        }
         </div>
       } @else {
         <!-- Écran de succès -->
@@ -174,18 +178,23 @@ import {Observable} from 'rxjs';
 
     /* Header flottant */
     .floating-header {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      border-radius: 20px;
-      padding: 24px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
+      backdrop-filter: blur(15px);
+      border-radius: 25px;
+      padding: 32px 28px;
       text-align: center;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      animation: slideInFromTop 0.6s ease-out;
-      width: 50%;
-      margin: 0 auto;
+      box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.1),
+        0 8px 20px rgba(0, 0, 0, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      animation: slideInFromTop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+      width: 100%;
+      max-width: 380px;
+      margin: 0;
+      position: relative;
+      overflow: hidden;
     }
-
     .app-title {
       margin: 0 0 8px 0;
       font-size: 2.2rem;
@@ -296,7 +305,36 @@ import {Observable} from 'rxjs';
       max-height: 50vh;
       overflow-y: auto;
       animation: slideInFromRight 0.6s ease-out 0.4s both;
+      max-width: 400px; /* Limiter la largeur sur desktop */
+      width: 100%;
     }
+    /* Modifications pour desktop */
+    @media (min-width: 1024px) {
+      .overlay {
+        padding: 52px;
+        gap: 24px;
+        max-width: 450px; /* NOUVEAU : Limiter la largeur de l'overlay */
+      }
+
+      .countries-panel {
+        max-width: 380px; /* NOUVEAU : Assurer que le panel reste compact */
+        margin-right: auto; /* NOUVEAU : Coller à gauche */
+      }
+
+      .floating-header {
+        max-width: 380px; /* NOUVEAU : Limiter la largeur du header */
+        margin: 0; /* NOUVEAU : Enlever le centrage automatique */
+      }
+
+      .country-cards {
+        /* MODIFIÉ : Garder en colonne sur desktop */
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+    }
+
+
 
     .panel-header {
       text-align: center;
@@ -660,37 +698,113 @@ import {Observable} from 'rxjs';
       }
     }
 
-    /* Responsive Design */
+    /* Responsive Design - Mobile d'abord */
     @media (max-width: 768px) {
       .overlay {
         padding: 16px;
         gap: 16px;
+        /* Changer la structure pour mobile */
+        flex-direction: column;
+        justify-content: flex-start;
       }
 
       .floating-header {
         padding: 20px;
+        /* Header plus compact sur mobile */
+        border-radius: 16px;
+        margin: 0 auto;
       }
 
       .app-title {
         font-size: 1.8rem;
+        margin-bottom: 8px;
       }
 
       .app-subtitle {
         font-size: 0.9rem;
+        padding: 0 12px;
+      }
+
+      .main-controls {
+        /* Contrôles centrés en haut */
+        order: 1;
       }
 
       .btn-generate {
-        min-width: 260px;
+        min-width: 100%;
         padding: 16px 24px;
       }
 
+      /* NOUVEAU: Panel des pays en drawer/modal sur mobile */
       .countries-panel {
-        padding: 20px;
-        max-height: 45vh;
+        position: fixed;
+        bottom: 0;
+        left: calc(50% - 200px);
+        right: 0;
+        z-index: 2000;
+        max-height: 60vh;
+        border-radius: 24px 24px 0 0;
+        margin: 0;
+        padding: 0;
+        box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.2);
+        animation: slideUpFromBottom 0.6s ease-out;
+
+        /* Permettre le scroll interne */
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Header du drawer */
+      .panel-header {
+        padding: 20px 20px 16px 20px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 24px 24px 0 0;
+        flex-shrink: 0;
+        position: relative;
+      }
+
+      /* Handle pour indiquer qu'on peut faire glisser */
+      .panel-header::before {
+        content: '';
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 36px;
+        height: 4px;
+        background: #d1d5db;
+        border-radius: 2px;
+      }
+
+      .panel-header h3 {
+        font-size: 1.1rem;
+        margin-bottom: 4px;
+      }
+
+      .distance-info {
+        font-size: 13px;
+      }
+
+      /* Zone de scroll pour les cartes */
+      .countries-scroll-area {
+        flex: 1;
+        overflow-y: auto;
+        padding: 0 20px 20px 20px;
+        background: rgba(255, 255, 255, 0.98);
+      }
+
+      .country-cards {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 16px;
       }
 
       .country-card {
-        padding: 14px;
+        padding: 16px;
+        border-radius: 12px;
       }
 
       .country-name {
@@ -698,25 +812,86 @@ import {Observable} from 'rxjs';
       }
 
       .country-flag {
-        width: 40px;
+        width: 36px;
       }
 
-      .success-title {
-        font-size: 2rem;
+      /* Bouton validation dans le drawer */
+      .btn-validate {
+        margin: 5px auto;
+        flex-shrink: 0;
+        width: 95%;
       }
 
-      .country-name-large {
-        font-size: 2rem;
+      /* Animation pour le drawer */
+      @keyframes slideUpFromBottom {
+        from {
+          transform: translateY(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
       }
 
-      .success-flag {
-        width: 60px;
+      /* Overlay sombre derrière le drawer (optionnel) */
+      .countries-panel::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.1);
+        z-index: -1;
+        opacity: 0;
+        animation: fadeIn 0.3s ease-out 0.2s forwards;
       }
-      .countries-panel{
-        align-self: unset;
+
+      @keyframes fadeIn {
+        to { opacity: 1; }
+      }
+
+      /* Assurer que la carte est visible */
+      .map-container {
+        /* S'assurer que la carte prend tout l'espace disponible */
+        height: 100vh;
+      }
+
+      /* Messages d'erreur adaptés */
+      .error-message {
+        max-width: 100%;
+        margin: 0 auto;
+      }
+
+      /* Référence pays sur mobile */
+      .reference-country {
+        padding: 10px 16px;
+        font-size: 14px;
+        border-radius: 20px;
       }
     }
 
+    /* Très petits écrans */
+    @media (max-width: 480px) {
+      .countries-panel {
+        max-height: 70vh; /* Plus d'espace sur très petits écrans */
+      }
+
+      .floating-header {
+        padding: 16px;
+      }
+
+      .app-title {
+        font-size: 1.6rem;
+      }
+
+      .btn-generate {
+        min-width: 100%;
+        padding: 14px 20px;
+        font-size: 15px;
+      }
+    }
     @media (min-width: 1024px) {
       .overlay {
         padding: 52px;
