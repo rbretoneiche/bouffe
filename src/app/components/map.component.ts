@@ -105,7 +105,8 @@ export interface Country {
       }
     }
   `]
-})export class MapComponent implements OnInit, OnDestroy, OnChanges {
+})
+export class MapComponent implements OnInit, OnDestroy, OnChanges {
   @Input() selectedCountries: Country[] = [];
   @Input() selectedCountry: Country | null = null;
 
@@ -171,9 +172,10 @@ export interface Country {
   private initMap(): void {
     // Initialiser la carte
     this.map = L.map('map', {
+      boxZoom: false,
       center: [20, 0], // Centre du monde
-      zoom: 2,
-      zoomControl: true,
+      zoom: 3,
+      zoomControl: false,
       scrollWheelZoom: true
     });
 
@@ -254,17 +256,13 @@ export interface Country {
       if (isDesktop) {
         // Sur desktop, ajouter du padding à gauche pour compenser le panel
         this.map.fitBounds(bounds, {
-          paddingTopLeft: [450, 50], // Padding à gauche pour éviter le panel
+          paddingTopLeft: [450, 100], // Padding à gauche pour éviter le panel
           paddingBottomRight: [50, 50]
         });
       } else {
         this.map.fitBounds(bounds.pad(0.1));
       }
     }
-  }
-
-  public resetView(): void {
-    this.map.setView([20, 0], 2);
   }
 
   // Nouvelle méthode pour démarrer l'animation de suspense
