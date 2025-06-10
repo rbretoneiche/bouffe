@@ -190,7 +190,7 @@ import {NgClass} from '@angular/common';
       inset 0 1px 0 rgba(255, 255, 255, 0.6);
       border: 1px solid rgba(255, 255, 255, 0.3);
       animation: slideInFromTop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-      width: 100%;
+      width: auto;
       max-width: 380px;
       margin: 0;
       position: relative;
